@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado de Mercancías</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    table {
+      width: 100%;
+      margin-bottom: 1rem;
+      color: #212529;
+      vertical-align: top;
+      border-collapse: collapse;
+    }
+    th {
+      padding: 0.75rem;
+      vertical-align: middle;
+      border-top: 1px solid #dee2e6;
+      text-align: inherit;
+    }
+    td {
+      padding: 0.75rem;
+      vertical-align: middle;
+      border-top: 1px solid #dee2e6;
+    }
+    .expirada {
+      background-color: #f8d7da !important;
+    }
+    .vigente {
+      background-color: #d4edda !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="text-center">Estado de Mercancías</h1>
+    <form id="formulario">
+      <div class="form-group">
+        <label for="tipo">Tipo de Mercancía:</label>
+        <select class="form-control" id="tipo" name="tipo">
+          <option value="Materiales de Construcción">Maquila</option>
+          <option value="Plásticos">Envases</option>
+          <option value="Maquinaria">vehìculos</option>
+          <option value="Herramientas">Muestras</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="descripcion">Descripción de la Mercancía</label>
+        <textarea class="form-control" id="descripcion" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="llegada">Día de Llegada:</label>
+        <input type="date" class="form-control" id="llegada" name="llegada">
+      </div>
+      <div class="form-group">
+        <label for="expiracion">Tiempo de Expiración:</label>
+        <input type="number" class="form-control" id="expiracion" name="expiracion" placeholder="Ingrese cantidad de meses">
+      </div>
+      <div class="form-group">
+        <label for="multa">Multa por exceder el tiempo de expiración (MXN):</label>
+        <input type="number" class="form-control" id="multa" name="multa" placeholder="Ingrese cantidad en pesos mexicanos">
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Agregar</button>
+    </form>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tipo de Mercancía</th>
+          <th>Descripción</th>
+          <th>Día de Llegada</th>
+          <th>Tiempo de Expiración</th>
+          <th>Días Restantes</th>
+          <th>Multa</th>
+        </tr>
+      </thead>
+      <tbody id="tabla">
+      </tbody>
+    </table>
+  </div>
+  <script>
+    const formulario = document.getElementById("formulario");
+    const tabla = document.getElementById("tabla");
+
+  formulario.addEventListener("submit", function(event) {
+  event.preventDefault();
+  const tipo = formulario.tipo.value;
+  const descripcion = formulario.descripcion.value;
+  const llegada = formulario.llegada.value;
+  const expiracion = formulario.expiracion.value;
+  const multa = formulario.multa.value;
+
+  const hoy = new Date();
+  const fechaLlegada = new Date(llegada);
+  const fechaExpiracion = new Date(fechaLlegada.getTime() + (expiracion * 30 * 24 * 60 * 60 * 1000));
+  const diasRestantes = Math.round((fechaExpiracion.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  const multaPorDia = (multa / 30) || 0;
+  const multaTotal = (diasRestantes < 0) ? Math.abs(diasRestantes) * multaPorDia : 0;
+
+
+
+  const fila = document.createElement("tr");
+  fila.innerHTML = `
+    <td>${tipo}</td>
+    <td>${descripcion}</td>
+    <td>${llegada}</td>
+    <td>${expiracion} meses</td>
+    <td>${diasRestantes} días</td>
+    <td>${(multaTotal > 0) ? `$${multaTotal.toFixed(2)} MXN` : '-'}</td>
+  `;
+
+  if (diasRestantes < 0) {
+    fila.classList.add("expirada");
+  } else {
+    fila.classList.add("vigente");
+  }
+
+  tabla.appendChild(fila);
+
+  formulario.reset();
+});
+
+ 
+  </script>
+</body>
+</html>
+
+
